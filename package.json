@@ -1,0 +1,15 @@
+{
+  "name": "@makeform/sheet",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {},
+  "keywords": [],
+  "author": "zbryikt",
+  "license": "MIT",
+  "dependencies": {
+    "@plotdb/srcbuild": "^0.0.67"
+  },
+  "devDependencies": {
+    "fedep": "^1.1.11"
+  }
+}
