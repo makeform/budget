@@ -1,4 +1,17 @@
 div
   style(type="text/css"): include:stylus index.styl
   script(type="@plotdb/block"): include:lsc index.ls
-  div(ld="sheet")
+  .form-group.has-tips.manual(ld="base error-root",plug="widget",style="cursor:default")
+    div(ld="display", data-display="block"): label.d-flex.align-items-end.flex-wrap
+      div
+        span(ld="label")
+        span.text-danger.ml-2(ld="is-required") *
+      .flex-grow-1
+      .m-edit: .text-danger.text-sm(ld="limitation")
+    .text-sm.text-muted(ld="display", data-display="block"): div(ld="desc", style="margin:-.6em 0 .7em")
+    .rounded.shadow-sm.border.mb-2.aspect-ratio.ratio-3by2.w-100(ld="sheet")
+    .d-flex.g-2.align-items-end
+      div 總金額:
+      div(ld="total")
+      .text-sm.text-muted(ld="unit")
+    .m-edit(ld="display",data-display="block"): .text-danger.text-sm.mt-2.note(ld-each="note")
