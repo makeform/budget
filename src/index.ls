@@ -56,19 +56,23 @@ mod = ({root, ctx, data, parent, t}) ->
           up = typeidx['unit price']
           q = typeidx['quantity']
           tp = typeidx['total price']
-          if !(~up and ~q) => return
           data = sh.data!
           lc.total = 0
-          for i from 1 til data.length
-            val = if data[i][up]? and data[i][q]? => +data[i][up] * data[i][q] else ''
-            val = if val == '' => '' else if val? and !isNaN(val) => +val else 0
-            data[i][tp] = val
-            lc.total += (val or 0)
-          sh.data data
-          view.render \total
+          if !(~up and ~q) =>
+            for i from 1 til data.length
+              val = if data[i][tp]? and !isNaN(data[i][tp]) => +data[i][tp] else 0
+              lc.total += (val or 0)
+          else
+            for i from 1 til data.length
+              val = if data[i][up]? and data[i][q]? => +data[i][up] * data[i][q] else ''
+              val = if val == '' => '' else if val? and !isNaN(val) => +val else 0
+              data[i][tp] = val
+              lc.total += (val or 0)
+            sh.data data
           data = JSON.parse(JSON.stringify(data))
           data.splice 0, 1
           @value {total: lc.total, data}
+          view.render \total
       text:
         total: ({node}) -> return lc.total or 0
         unit: ({node}) ~> t(@mod.info.config.unit or '')
