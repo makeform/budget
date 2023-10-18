@@ -17,7 +17,9 @@ mod = ({root, ctx, data, parent, t}) ->
   init: ->
     @on \change, (v = {}) ~>
       lc.total = v.total or 0
-      lc.sheet.data v.data or []
+      data = JSON.parse(JSON.stringify(v.data)) or []
+      data = [heads.map(->t it.name)] ++ data
+      lc.sheet.data data
       view.render \total
     heads = ((data.config or {}).fields or [])
     ['total price']
@@ -40,7 +42,7 @@ mod = ({root, ctx, data, parent, t}) ->
           slider: true
           data: [heads.map(->t it.name)]
           frozen: row: 1
-          size: col: <[250px]>
+          size: col: heads.map(-> if it.type == \name => \250px else '')
           class: row: <[hl]>
           cellcfg: ({row, col, type}) ->
             if type == \readonly =>
@@ -64,7 +66,9 @@ mod = ({root, ctx, data, parent, t}) ->
             lc.total += (val or 0)
           sh.data data
           view.render \total
-          @value {total: lc.total, data: JSON.parse(JSON.stringify(data))}
+          data = JSON.parse(JSON.stringify(data))
+          data.splice 0, 1
+          @value {total: lc.total, data}
       text:
         total: ({node}) -> return lc.total or 0
         unit: ({node}) ~> t(@mod.info.config.unit or '')
