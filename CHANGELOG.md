@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.0.4
+
+ - add `papaparse` as dependency
+ - update field update mechanism to prevent unexpected zero
+
+
 ## v0.0.3
 
  - add `width` option in field objects.

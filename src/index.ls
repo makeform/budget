@@ -2,6 +2,7 @@ module.exports =
   pkg:
     name: "@makeform/budget", extend: {name: "@makeform/common"}
     dependencies: [
+      {name: "papaparse", path: "papaparse.min.js"}
       {name: "@plotdb/sheet"}
       {name: "@plotdb/sheet", type: \css}
     ]
@@ -77,7 +78,8 @@ mod = ({root, ctx, data, parent, t}) ->
               lc.total += (val or 0)
           else
             for i from 1 til data.length
-              val = if data[i][up]? and data[i][q]? => +data[i][up] * data[i][q] else ''
+              [_up, _q] = [data[i][up], data[i][q]].map -> "#{if it? => it else ''}".trim!
+              val = if _up != '' and _q != '' => +_up * +_q else ''
               val = if val == '' => '' else if val? and !isNaN(val) => +val else 0
               data[i][tp] = val
               lc.total += (val or 0)
