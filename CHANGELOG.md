@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.5
+
+ - tweak for i18n
+
+
 ## v0.0.4
 
  - add `papaparse` as dependency

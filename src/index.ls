@@ -7,8 +7,12 @@ module.exports =
       {name: "@plotdb/sheet", type: \css}
     ]
     i18n:
-      "en": "單位": "unit"
-      "zh-TW": "unit": "單位"
+      "en":
+        "單位": "unit"
+        "總金額": "Subtotal"
+      "zh-TW":
+        "unit": "單位"
+        "總金額": "總金額"
 
   init: (opt) -> opt.pubsub.fire \subinit, mod: mod(opt)
 
