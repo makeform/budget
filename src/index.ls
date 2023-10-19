@@ -13,15 +13,22 @@ module.exports =
 
 mod = ({root, ctx, data, parent, t}) -> 
   {sheet} = ctx
-  lc = total: 0
+  lc = total: 0, mode: \edit
   init: ->
     @on \change, (v = {}) ~>
       lc.total = v.total or 0
       data = JSON.parse(JSON.stringify(v.data)) or []
       data = [heads.map(->t it.name)] ++ data
+      lc._data = JSON.parse(JSON.stringify(data)) or []
       lc.sheet.data data
       view.render \total
-    heads = ((data.config or {}).fields or [])
+    @on \mode, (m) ~>
+      lc.mode = m
+      lc.sheet.render!
+    is-readonly = ~>
+      meta = @mod.info.config.meta or {}
+      return (lc.mode == \view) or meta.disabled or meta.readonly
+    heads = ((@mod.info.config or {}).fields or [])
     ['total price']
       .filter (n) -> !heads.filter((h)-> h.type == n).length
       .for-each (n) -> heads.push {name: n, type: n}
@@ -37,15 +44,20 @@ mod = ({root, ctx, data, parent, t}) ->
     view = new ldview do
       root: root
       init: sheet: ({node, ctx}) ~>
+        size = heads.map ->
+          ret = it.width or ''
+          if it.type == \name and !ret => ret = \250px
+          return ret
         lc.sheet = sh = new sheet do
           root: node
           slider: true
           data: [heads.map(->t it.name)]
           frozen: row: 1
-          size: col: heads.map(-> if it.type == \name => \250px else '')
+          size: col: size
           class: row: <[hl]>
           cellcfg: ({row, col, type}) ->
             if type == \readonly =>
+              if is-readonly! => return true
               if row == 0 => return true
               if cls[col] == \disabled => return true
               return false
@@ -53,6 +65,7 @@ mod = ({root, ctx, data, parent, t}) ->
               if row == 0 => return \disabled
               return cls[col] or ''
         sh.on \change, ~>
+          if is-readonly! => return sh.data JSON.parse(JSON.stringify(lc._data))
           up = typeidx['unit price']
           q = typeidx['quantity']
           tp = typeidx['total price']
