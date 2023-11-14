@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.6
+
+ - add error tip and status indicator in number node
+
+
 ## v0.0.5
 
  - tweak for i18n

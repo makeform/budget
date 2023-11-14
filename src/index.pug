@@ -12,6 +12,7 @@ div
     .rounded.shadow-sm.border.mb-2.aspect-ratio.ratio-3by2.w-100(ld="sheet")
     .d-flex.g-2.align-items-end
       div #[span(t) 總金額]:
-      div(ld="total")
+      .d-flex.align-items-center(ld="total")
       .text-sm.text-muted(ld="unit")
+    .m-edit: .hover-tip.tip-sm: div(ld-each="error")
     .m-edit(ld="display",data-display="block"): .text-danger.text-sm.mt-2.note(ld-each="note")

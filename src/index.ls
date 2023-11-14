@@ -92,6 +92,8 @@ mod = ({root, ctx, data, parent, t}) ->
           data.splice 0, 1
           @value {total: lc.total, data}
           view.render \total
+      handler:
+        total: ({node}) ~> node.classList.toggle \text-danger, (@status! == 2)
       text:
         total: ({node}) -> return lc.total or 0
         unit: ({node}) ~> t(@mod.info.config.unit or '')
