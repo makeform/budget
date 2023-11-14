@@ -7,7 +7,7 @@ div
         span(ld="label")
         span.text-danger.ml-2(ld="is-required") *
       .flex-grow-1
-      .m-edit: .text-danger.text-sm(ld="limitation")
+      .m-edit: .mf-note.text-sm(ld="limitation")
     .text-sm.text-muted(ld="display", data-display="block"): div(ld="desc", style="margin:-.6em 0 .7em")
     .rounded.shadow-sm.border.mb-2.aspect-ratio.ratio-3by2.w-100(ld="sheet")
     .d-flex.g-2.align-items-end
@@ -15,4 +15,4 @@ div
       .d-flex.align-items-center(ld="total")
       .text-sm.text-muted(ld="unit")
     .m-edit: .hover-tip.tip-sm: div(ld-each="error")
-    .m-edit(ld="display",data-display="block"): .text-danger.text-sm.mt-2.note(ld-each="note")
+    .m-edit(ld="display",data-display="block"): .mf-note.text-sm.mt-2.note(ld-each="note")

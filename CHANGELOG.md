@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.7
+
+ - use `mf-note` to replace styling in note-related tag.
+
+
 ## v0.0.6
 
  - add error tip and status indicator in number node
