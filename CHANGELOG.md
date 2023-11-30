@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.0.8 (upcoming)
+
+ - support plain text viewing mode
+ - support alternative editing mode (WIP)
+
+
 ## v0.0.7
 
  - use `mf-note` to replace styling in note-related tag.

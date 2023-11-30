@@ -1,9 +1,53 @@
 .sheet .disabled { background: #eee; color: #777 }
 .sheet .hl {border-bottom: 2px solid #000 }
 .sheet .name-field { white-space: normal; word-break: break-all }
+.sheet .cell, .sheet .edit textarea { max-height: 300px }
 [ld=total].text-danger:after
   font-family: ldi
   display: inline
   content: "\f03d"
   font-size: .85em
   margin-left: .5em
+
+.lc-sheet-viewer
+  .lc-sheet-row
+    .form-control
+      height: auto
+.lc-sheet-row
+  display: flex
+  position: relative
+  .form-control
+    width: 0
+  i.i-close
+    position: absolute
+    top: 0
+    bottom: 0
+    margin: auto
+    line-height: 1em
+    height: fit-content
+    font-size: .6em
+    background: #fff
+    padding: .25em
+    border-radius: 50%
+    border: 1px solid var(--danger)
+    color: var(--danger)
+    left: -.75em
+    cursor: pointer
+  .form-control, .row-head
+    flex: 1 1 auto
+  .form-control:not(:last-child)
+    border-right: 0
+    border-top-right-radius: 0
+    border-bottom-right-radius: 0
+  .form-control:not(:first-child)
+    border-top-left-radius: 0
+    border-bottom-left-radius: 0
+.lc-sheet-row:not(:last-child)
+  .form-control
+    border-bottom-left-radius: 0
+    border-bottom-right-radius: 0
+    border-bottom: 0
+.lc-sheet-row:not(:nth-child(1))
+  .form-control
+    border-top-left-radius: 0
+    border-top-right-radius: 0

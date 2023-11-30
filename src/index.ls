@@ -10,9 +10,11 @@ module.exports =
       "en":
         "單位": "unit"
         "總金額": "Subtotal"
+        "追加": "Add"
       "zh-TW":
         "unit": "單位"
         "總金額": "總金額"
+        "追加": "追加"
 
   init: (opt) -> opt.pubsub.fire \subinit, mod: mod(opt)
 
@@ -25,11 +27,12 @@ mod = ({root, ctx, data, parent, t}) ->
       data = JSON.parse(JSON.stringify(v.data)) or []
       data = [heads.map(->t it.name)] ++ data
       lc._data = JSON.parse(JSON.stringify(data)) or []
-      lc.sheet.data data
-      view.render \total
+      if lc.sheet => lc.sheet.data data
+      view.render \total, \row, \head
     @on \mode, (m) ~>
       lc.mode = m
-      lc.sheet.render!
+      if lc.sheet => lc.sheet.render!
+      view.render \row, \head, \sheet, \table, \viewer
     is-readonly = ~>
       meta = @mod.info.config.meta or {}
       return (lc.mode == \view) or meta.disabled or meta.readonly
@@ -37,6 +40,7 @@ mod = ({root, ctx, data, parent, t}) ->
     ['total price']
       .filter (n) -> !heads.filter((h)-> h.type == n).length
       .for-each (n) -> heads.push {name: n, type: n}
+    heads.map (d,i) -> d.idx = i
     types = heads.map(-> it.type)
     typeidx = {}
     ['name', 'unit price', 'quantity', 'total price'].map (n) -> typeidx[n] = types.indexOf(n)
@@ -46,6 +50,34 @@ mod = ({root, ctx, data, parent, t}) ->
         if ~typeidx['unit price'] and ~typeidx['quantity'] => \disabled else ''
       | 'name' => \name-field
       | otherwise => ''
+
+    get-sum = (data) ->
+      sum = 0
+      up = typeidx['unit price']
+      q = typeidx['quantity']
+      tp = typeidx['total price']
+      if !(~up and ~q) =>
+        for i from 1 til data.length
+          val = if data[i][tp]? and !isNaN(data[i][tp]) => +data[i][tp] else 0
+          sum += (val or 0)
+      else
+        for i from 1 til data.length
+          [_up, _q] = [data[i][up], data[i][q]].map -> "#{if it? => it else ''}".trim!
+          val = if _up != '' and _q != '' => +_up * +_q else ''
+          val = if val == '' => '' else if val? and !isNaN(val) => +val else 0
+          data[i][tp] = val
+          sum += (val or 0)
+      {data, sum}
+
+    update-data = (data) ~>
+      ret = get-sum data
+      lc.total = ret.sum
+      data = JSON.parse(JSON.stringify(ret.data))
+      data.splice 0, 1
+      @value {total: lc.total, data}
+      view.render \total
+      return ret
+
     view = new ldview do
       root: root
       init: sheet: ({node, ctx}) ~>
@@ -60,6 +92,8 @@ mod = ({root, ctx, data, parent, t}) ->
           frozen: row: 1
           size: col: size
           class: row: <[hl]>
+          scroll-lock: true
+          enable-scrolling: false
           cellcfg: ({row, col, type}) ->
             if type == \readonly =>
               if is-readonly! => return true
@@ -71,29 +105,55 @@ mod = ({root, ctx, data, parent, t}) ->
               return cls[col] or ''
         sh.on \change, ~>
           if is-readonly! => return sh.data JSON.parse(JSON.stringify(lc._data))
-          up = typeidx['unit price']
-          q = typeidx['quantity']
-          tp = typeidx['total price']
           data = sh.data!
-          lc.total = 0
-          if !(~up and ~q) =>
-            for i from 1 til data.length
-              val = if data[i][tp]? and !isNaN(data[i][tp]) => +data[i][tp] else 0
-              lc.total += (val or 0)
-          else
-            for i from 1 til data.length
-              [_up, _q] = [data[i][up], data[i][q]].map -> "#{if it? => it else ''}".trim!
-              val = if _up != '' and _q != '' => +_up * +_q else ''
-              val = if val == '' => '' else if val? and !isNaN(val) => +val else 0
-              data[i][tp] = val
-              lc.total += (val or 0)
-            sh.data data
-          data = JSON.parse(JSON.stringify(data))
-          data.splice 0, 1
-          @value {total: lc.total, data}
+          ret = update-data data
+          sh.data ret.data
           view.render \total
+      action: click: add: ({node}) ->
+        lc._data.push heads.map(->'')
+        update-data lc._data
+        view.render!
       handler:
+        sheet: ({node}) ~> node.classList.toggle \d-none, @mode! == \view
+        table: ({node}) ~> node.classList.toggle \d-none, true
+        viewer: ({node}) ~> node.classList.toggle \d-none, @mode! != \view
         total: ({node}) ~> node.classList.toggle \text-danger, (@status! == 2)
+        "head":
+          list: -> heads
+          key: -> it.idx
+          view: handler: "@": ({node, ctx}) ->
+            node.innerText = ctx.name
+            node.style.width = ctx.width or ''
+        row:
+          list: ->
+            ret = (lc._data or []).map (d,i) -> {data: d, idx: i}
+            ret.filter(-> it and it.data.filter and it.data.filter(->it?).length).slice 1
+          key: -> it.idx
+          view:
+            action: click: close: ({ctx, views}) ~>
+              lc._data.splice ctx.idx, 1
+              data = JSON.parse(JSON.stringify(lc._data)).splice 0, 1
+              ret = update-data data
+              view.render!
+            handler:
+              col:
+                list: -> heads
+                key: -> it
+                view:
+                  handler: "@": ({node, ctx, ctxs}) ->
+                    node.style.width = ctx.width or ''
+                    v = ctxs.0.data[ctx.idx] or ''
+                    node.value = v
+                    node.innerText = v
+                  action:
+                    input: "@": ({node, ctx, ctxs, views}) ->
+                      lc._data[ctxs.0.idx][ctx.idx] = node.value or ''
+                      update-data lc._data
+                      views.1.render!
+                    change: "@": ({node, ctx, ctxs, views}) ->
+                      lc._data[ctxs.0.idx][ctx.idx] = node.value or ''
+                      update-data lc._data
+                      views.1.render!
       text:
         total: ({node}) -> return lc.total or 0
         unit: ({node}) ~> t(@mod.info.config.unit or '')
