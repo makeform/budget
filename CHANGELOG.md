@@ -1,9 +1,14 @@
 # Change Log
 
-## v0.0.8 (upcoming)
+## v0.0.9 (upcoming)
+
+ - support alternative editing mode (WIP)
+
+
+## v0.0.8
 
  - support plain text viewing mode
- - support alternative editing mode (WIP)
+ - limit sheet widget scrolling and cell sizing to optimize user experience
 
 
 ## v0.0.7
