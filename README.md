@@ -1,6 +1,5 @@
 # @makeform/budget
 
-
 ## config
 
  - `fields`: Array of field object with following fields:
@@ -11,6 +10,8 @@
      - `quantity`: how many entries of this item.
      - `total price`: when `unit price` and `quantity` provided, this will be readonly and calculated automatically.
    - `width`: optional. used for explicitly set cell width (with unit).
+ - `mode`: either `sheet` or `table`. default `sheet` if omitted.
+   - when setting to `table`, table style edit interface is used. otherwise `@plotdb/sheet` is used.
 
 
 ## License

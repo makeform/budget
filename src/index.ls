@@ -11,10 +11,12 @@ module.exports =
         "單位": "unit"
         "總金額": "Subtotal"
         "追加": "Add"
+        "無資料": "No Data"
       "zh-TW":
         "unit": "單位"
         "總金額": "總金額"
         "追加": "追加"
+        "無資料": "無資料"
 
   init: (opt) -> opt.pubsub.fire \subinit, mod: mod(opt)
 
@@ -28,15 +30,17 @@ mod = ({root, ctx, data, parent, t}) ->
       data = [heads.map(->t it.name)] ++ data
       lc._data = JSON.parse(JSON.stringify(data)) or []
       if lc.sheet => lc.sheet.data data
-      view.render \total, \row, \head
+      view.render \total, \no-row, \row, \head
     @on \mode, (m) ~>
       lc.mode = m
       if lc.sheet => lc.sheet.render!
-      view.render \row, \head, \sheet, \table, \viewer
+      view.render \no-row, \row, \head, \sheet, \table, \viewer
+    is-table-mode = ~> (@mod.info.config or {}).mode == \table
     is-readonly = ~>
       meta = @mod.info.config.meta or {}
       return (lc.mode == \view) or meta.disabled or meta.readonly
     heads = ((@mod.info.config or {}).fields or [])
+    lc._data = [heads.map -> it]
     ['total price']
       .filter (n) -> !heads.filter((h)-> h.type == n).length
       .for-each (n) -> heads.push {name: n, type: n}
@@ -69,13 +73,16 @@ mod = ({root, ctx, data, parent, t}) ->
           sum += (val or 0)
       {data, sum}
 
-    update-data = (data) ~>
+    update-data = (data, _view) ~>
       ret = get-sum data
       lc.total = ret.sum
       data = JSON.parse(JSON.stringify(ret.data))
       data.splice 0, 1
-      @value {total: lc.total, data}
-      view.render \total
+      @value {total: lc.total, data} .then ->
+        view.render \total
+        if !_view => return
+        _view.render!
+        _update!now!
       return ret
 
     view = new ldview do
@@ -108,14 +115,12 @@ mod = ({root, ctx, data, parent, t}) ->
           data = sh.data!
           ret = update-data data
           sh.data ret.data
-          view.render \total
       action: click: add: ({node}) ->
         lc._data.push heads.map(->'')
-        update-data lc._data
-        view.render!
+        update-data lc._data, view
       handler:
-        sheet: ({node}) ~> node.classList.toggle \d-none, @mode! == \view
-        table: ({node}) ~> node.classList.toggle \d-none, true
+        sheet: ({node}) ~> node.classList.toggle \d-none, (@mode! == \view or is-table-mode!)
+        table: ({node}) ~> node.classList.toggle \d-none, (@mode! == \view or !is-table-mode!)
         viewer: ({node}) ~> node.classList.toggle \d-none, @mode! != \view
         total: ({node}) ~> node.classList.toggle \text-danger, (@status! == 2)
         "head":
@@ -124,39 +129,50 @@ mod = ({root, ctx, data, parent, t}) ->
           view: handler: "@": ({node, ctx}) ->
             node.innerText = ctx.name
             node.style.width = ctx.width or ''
+        "no-row": ({node}) ->
+          row-count = (lc._data or [])
+            .filter(-> it and it.filter and it.filter(->it?).length)
+            .length < 2
+          node.classList.toggle \d-none, !row-count
         row:
           list: ->
             ret = (lc._data or []).map (d,i) -> {data: d, idx: i}
             ret.filter(-> it and it.data.filter and it.data.filter(->it?).length).slice 1
           key: -> it.idx
           view:
-            action: click: close: ({ctx, views}) ~>
+            action: click: delete: ({ctx, views}) ~>
               lc._data.splice ctx.idx, 1
-              data = JSON.parse(JSON.stringify(lc._data)).splice 0, 1
-              ret = update-data data
-              view.render!
+              data = JSON.parse(JSON.stringify(lc._data))
+              data.splice 0, 1
+              ret = update-data data, view
             handler:
               col:
                 list: -> heads
                 key: -> it
                 view:
-                  handler: "@": ({node, ctx, ctxs}) ->
+                  handler: "@": ({node, ctx, ctxs, views}) ->
                     node.style.width = ctx.width or ''
                     v = ctxs.0.data[ctx.idx] or ''
                     node.value = v
                     node.innerText = v
+                    _update!
                   action:
                     input: "@": ({node, ctx, ctxs, views}) ->
                       lc._data[ctxs.0.idx][ctx.idx] = node.value or ''
-                      update-data lc._data
-                      views.1.render!
+                      update-data lc._data, views.1
                     change: "@": ({node, ctx, ctxs, views}) ->
                       lc._data[ctxs.0.idx][ctx.idx] = node.value or ''
-                      update-data lc._data
-                      views.1.render!
+                      update-data lc._data, views.1
       text:
         total: ({node}) -> return lc.total or 0
         unit: ({node}) ~> t(@mod.info.config.unit or '')
+
+    _update = debounce ->
+      ld$.find(root, '.lc-sheet-row').map (node) ->
+        fields = ld$.find(node, \textarea)
+        fields.map -> it.style.height = "0px"
+        sh = Math.max.apply Math, fields.map -> it.scrollHeight
+        fields.map -> it.style.height = "#{sh}px"
 
   render: ->
   is-empty: (v) -> return !(v and v.data and v.data.length and v.data.filter(->it.length).length)

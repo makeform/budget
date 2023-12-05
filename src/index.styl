@@ -13,11 +13,13 @@
   .lc-sheet-row
     .form-control
       height: auto
-.lc-sheet-row
+.lc-sheet-row, .lc-sheet-no-row
   display: flex
   position: relative
   .form-control
     width: 0
+    box-shadow: none!important
+    resize: none
   i.i-close
     position: absolute
     top: 0
@@ -39,7 +41,7 @@
     border-right: 0
     border-top-right-radius: 0
     border-bottom-right-radius: 0
-  .form-control:not(:first-child)
+  .form-control:not(:nth-child(-n + 2))
     border-top-left-radius: 0
     border-bottom-left-radius: 0
 .lc-sheet-row:not(:last-child)
@@ -47,7 +49,7 @@
     border-bottom-left-radius: 0
     border-bottom-right-radius: 0
     border-bottom: 0
-.lc-sheet-row:not(:nth-child(1))
+.lc-sheet-row:not(:nth-child(1)), .lc-sheet-no-row
   .form-control
     border-top-left-radius: 0
     border-top-right-radius: 0

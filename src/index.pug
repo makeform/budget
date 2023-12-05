@@ -13,19 +13,22 @@ div
     .mb-2(ld="table")
       .mb-2
         .lc-sheet-row: .row-head.form-control(ld-each="head")
+        .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
         .lc-sheet-row(ld-each="row")
-          i.i-close(ld="close")
+          i.i-close(ld="delete")
           textarea.form-control(ld-each="col")
-      .btn.btn-sm.btn-outline-secondary(t,ld="add") 追加
     .mb-2(ld="viewer")
       .mb-2.lc-sheet-viewer
         .lc-sheet-row: .row-head.form-control(ld-each="head")
-        .lc-sheet-row(ld-each="row")
-          .form-control(ld-each="col")
+        .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
+        .lc-sheet-row(ld-each="row"): .form-control(ld-each="col")
 
-    .d-flex.g-2.align-items-end
-      div #[span(t) 總金額]:
-      .d-flex.align-items-center(ld="total")
-      .text-sm.text-muted(ld="unit")
+    .d-flex.justify-content-between
+      .d-flex.g-2.align-items-end
+        div #[span(t) 總金額]:
+        .d-flex.align-items-center(ld="total")
+        .text-sm.text-muted(ld="unit")
+      div(ld="table"): .btn.btn-sm.btn-outline-secondary(t="追加",ld="add")
+
     .m-edit: .hover-tip.tip-sm: div(ld-each="error")
     .m-edit(ld="display",data-display="block"): .mf-note.text-sm.mt-2.note(ld-each="note")

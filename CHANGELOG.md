@@ -1,8 +1,9 @@
 # Change Log
 
-## v0.0.9 (upcoming)
+## v0.0.9
 
- - support alternative editing mode (WIP)
+ - support alternative editing mode by setting `config.mode` to `table`.
+ - add `no data` hint.
 
 
 ## v0.0.8
