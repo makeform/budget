@@ -142,9 +142,7 @@ mod = ({root, ctx, data, parent, t}) ->
           view:
             action: click: delete: ({ctx, views}) ~>
               lc._data.splice ctx.idx, 1
-              data = JSON.parse(JSON.stringify(lc._data))
-              data.splice 0, 1
-              ret = update-data data, view
+              ret = update-data lc._data, view
             handler:
               col:
                 list: -> heads
