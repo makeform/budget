@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.10
+
+ - fix bug: `delete` accidentally remove one additional row
+
+
 ## v0.0.9
 
  - support alternative editing mode by setting `config.mode` to `table`.
