@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.0.11
+
+ - fix bug: border radius incorrectly styled for header
+ - tweak cell to always make it higher a little to prevent unexpected scrolling
+
+
 ## v0.0.10
 
  - fix bug: `delete` accidentally remove one additional row

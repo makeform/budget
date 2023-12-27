@@ -19,7 +19,8 @@ div
           textarea.form-control(ld-each="col")
     .mb-2(ld="viewer")
       .mb-2.lc-sheet-viewer
-        .lc-sheet-row: .row-head.form-control(ld-each="head")
+        .lc-sheet-row
+          .row-head.form-control(ld-each="head")
         .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
         .lc-sheet-row(ld-each="row"): .form-control(ld-each="col")
 

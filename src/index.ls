@@ -164,13 +164,12 @@ mod = ({root, ctx, data, parent, t}) ->
       text:
         total: ({node}) -> return lc.total or 0
         unit: ({node}) ~> t(@mod.info.config.unit or '')
-
     _update = debounce ->
       ld$.find(root, '.lc-sheet-row').map (node) ->
         fields = ld$.find(node, \textarea)
         fields.map -> it.style.height = "0px"
         sh = Math.max.apply Math, fields.map -> it.scrollHeight
-        fields.map -> it.style.height = "#{sh}px"
+        fields.map -> it.style.height = "#{sh + 2}px"
 
   render: ->
   is-empty: (v) -> return !(v and v.data and v.data.length and v.data.filter(->it.length).length)
