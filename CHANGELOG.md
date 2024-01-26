@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.12
+
+ - fix bug: render should call view.render to update widget content
+
+
 ## v0.0.11
 
  - fix bug: border radius incorrectly styled for header

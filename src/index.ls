@@ -85,7 +85,7 @@ mod = ({root, ctx, data, parent, t}) ->
         _update!now!
       return ret
 
-    view = new ldview do
+    @mod.child.view = view = new ldview do
       root: root
       init: sheet: ({node, ctx}) ~>
         size = heads.map ->
@@ -171,7 +171,7 @@ mod = ({root, ctx, data, parent, t}) ->
         sh = Math.max.apply Math, fields.map -> it.scrollHeight
         fields.map -> it.style.height = "#{sh + 2}px"
 
-  render: ->
+  render: -> if @mod.child.view => @mod.child.view.render!
   is-empty: (v) -> return !(v and v.data and v.data.length and v.data.filter(->it.length).length)
   is-equal: (u, v) ->
     [eu,ev] = [@is-empty(u), @is-empty(v)]
