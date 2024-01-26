@@ -8,7 +8,7 @@ module.exports =
     ]
     i18n:
       "en":
-        "單位": "unit"
+        "單位": "Unit"
         "總金額": "Subtotal"
         "追加": "Add"
         "無資料": "No Data"
@@ -45,6 +45,11 @@ mod = ({root, ctx, data, parent, t}) ->
       .filter (n) -> !heads.filter((h)-> h.type == n).length
       .for-each (n) -> heads.push {name: n, type: n}
     heads.map (d,i) -> d.idx = i
+    @mod.child.sheet-update = ->
+      d = lc.sheet.data!
+      d.splice 0, 1
+      d = [heads.map(->t it.name)] ++ d
+      lc.sheet.data d
     types = heads.map(-> it.type)
     typeidx = {}
     ['name', 'unit price', 'quantity', 'total price'].map (n) -> typeidx[n] = types.indexOf(n)
@@ -171,7 +176,9 @@ mod = ({root, ctx, data, parent, t}) ->
         sh = Math.max.apply Math, fields.map -> it.scrollHeight
         fields.map -> it.style.height = "#{sh + 2}px"
 
-  render: -> if @mod.child.view => @mod.child.view.render!
+  render: ->
+    if @mod.child.view => @mod.child.view.render!
+    if @mod.child.sheet-update => @mod.child.sheet-update!
   is-empty: (v) -> return !(v and v.data and v.data.length and v.data.filter(->it.length).length)
   is-equal: (u, v) ->
     [eu,ev] = [@is-empty(u), @is-empty(v)]

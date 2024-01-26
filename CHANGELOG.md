@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.0.13
+
+ - fix bug: sheet headers are not correctly translated
+ - tweak i18n
+
+
 ## v0.0.12
 
  - fix bug: render should call view.render to update widget content
