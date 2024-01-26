@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.14
+
+ - fix bug: table headers are not correctly translated
+
+
 ## v0.0.13
 
  - fix bug: sheet headers are not correctly translated

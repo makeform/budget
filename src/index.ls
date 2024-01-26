@@ -132,7 +132,7 @@ mod = ({root, ctx, data, parent, t}) ->
           list: -> heads
           key: -> it.idx
           view: handler: "@": ({node, ctx}) ->
-            node.innerText = ctx.name
+            node.innerText = t(ctx.name)
             node.style.width = ctx.width or ''
         "no-row": ({node}) ->
           row-count = (lc._data or [])
