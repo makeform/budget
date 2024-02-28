@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.16
+
+ - use correct key function when iterating cols in ldview
+
+
 ## v0.0.15
 
  - make subsidy readonly and calculated automatically by self-fund field

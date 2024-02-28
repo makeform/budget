@@ -162,7 +162,7 @@ mod = ({root, ctx, data, parent, t}) ->
             handler:
               col:
                 list: -> heads
-                key: -> it
+                key: -> it.idx
                 view:
                   handler: "@": ({node, ctx, ctxs, views}) ->
                     node.style.width = ctx.width or ''
