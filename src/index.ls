@@ -49,14 +49,17 @@ mod = ({root, ctx, data, parent, t}) ->
       d = lc.sheet.data!
       d.splice 0, 1
       d = [heads.map(->t it.name)] ++ d
-      lc.sheet.data d
+      ret = get-sum d
+      lc.sheet.data ret.data
     types = heads.map(-> it.type)
     typeidx = {}
-    ['name', 'unit price', 'quantity', 'total price'].map (n) -> typeidx[n] = types.indexOf(n)
+    ['name', 'unit price', 'quantity', 'total price', 'self-fund', 'subsidy'].map (n) ->
+      typeidx[n] = types.indexOf(n)
     cls = heads.map ->
       return switch it.type
       | 'total price' =>
         if ~typeidx['unit price'] and ~typeidx['quantity'] => \disabled else ''
+      | 'subsidy' => \disabled
       | 'name' => \name-field
       | otherwise => ''
 
@@ -65,6 +68,8 @@ mod = ({root, ctx, data, parent, t}) ->
       up = typeidx['unit price']
       q = typeidx['quantity']
       tp = typeidx['total price']
+      sf = typeidx['self-fund']
+      subsidy = typeidx['subsidy']
       if !(~up and ~q) =>
         for i from 1 til data.length
           val = if data[i][tp]? and !isNaN(data[i][tp]) => +data[i][tp] else 0
@@ -76,6 +81,12 @@ mod = ({root, ctx, data, parent, t}) ->
           val = if val == '' => '' else if val? and !isNaN(val) => +val else 0
           data[i][tp] = val
           sum += (val or 0)
+      if (~subsidy) =>
+        for i from 1 til data.length =>
+          _sf = "#{if ~sf => if data[i][sf]? => data[i][sf] else ''}".trim!
+          _sf = if isNaN(+_sf) or !_sf => 0 else +_sf
+          data[i][subsidy] = if !data[i][tp]? or data[i][tp] == '' => ''
+          else (+data[i][tp] - (_sf)) >? 0
       {data, sum}
 
     update-data = (data, _view) ~>

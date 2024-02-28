@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.15
+
+ - make subsidy readonly and calculated automatically by self-fund field
+
+
 ## v0.0.14
 
  - fix bug: table headers are not correctly translated
