@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.17
+
+ - provide calculated `subsidy` in value
+
+
 ## v0.0.16
 
  - use correct key function when iterating cols in ldview

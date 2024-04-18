@@ -24,12 +24,15 @@ mod = ({root, ctx, data, parent, t}) ->
   {sheet} = ctx
   lc = total: 0, mode: \edit
   init: ->
+
     @on \change, (v = {}) ~>
-      lc.total = v.total or 0
+      lc <<< total: v.total or 0, subsidy: v.subsidy or 0
       data = JSON.parse(JSON.stringify(v.data)) or []
       data = [heads.map(->t it.name)] ++ data
       lc._data = JSON.parse(JSON.stringify(data)) or []
-      if lc.sheet => lc.sheet.data data
+      ret = get-sum lc._data
+      lc <<< ret{total, subsidy}
+      if lc.sheet => lc.sheet.data ret.data
       view.render \total, \no-row, \row, \head
     @on \mode, (m) ~>
       lc.mode = m
@@ -65,6 +68,7 @@ mod = ({root, ctx, data, parent, t}) ->
 
     get-sum = (data) ->
       sum = 0
+      sum-subsidy = 0
       up = typeidx['unit price']
       q = typeidx['quantity']
       tp = typeidx['total price']
@@ -85,16 +89,18 @@ mod = ({root, ctx, data, parent, t}) ->
         for i from 1 til data.length =>
           _sf = "#{if ~sf => if data[i][sf]? => data[i][sf] else ''}".trim!
           _sf = if isNaN(+_sf) or !_sf => 0 else +_sf
-          data[i][subsidy] = if !data[i][tp]? or data[i][tp] == '' => ''
+          val = data[i][subsidy] = if !data[i][tp]? or data[i][tp] == '' => ''
           else (+data[i][tp] - (_sf)) >? 0
-      {data, sum}
+          val = if !val => 0 else if isNaN(parseFloat(val)) => 0 else +val
+          sum-subsidy += (val or 0)
+      {data, total: sum, subsidy: sum-subsidy}
 
     update-data = (data, _view) ~>
       ret = get-sum data
-      lc.total = ret.sum
+      lc <<< ret{total, subsidy}
       data = JSON.parse(JSON.stringify(ret.data))
       data.splice 0, 1
-      @value {total: lc.total, data} .then ->
+      @value {total: lc.total, subsidy: lc.subsidy, data} .then ->
         view.render \total
         if !_view => return
         _view.render!
