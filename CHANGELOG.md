@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.18
+
+ - remove unnecessary log
+
+
 ## v0.0.17
 
  - provide calculated `subsidy` in value
