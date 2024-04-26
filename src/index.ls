@@ -22,9 +22,8 @@ module.exports =
 
 mod = ({root, ctx, data, parent, t}) -> 
   {sheet} = ctx
-  lc = total: 0, mode: \edit
   init: ->
-
+    lc = total: 0, mode: \edit
     @on \change, (v = {}) ~>
       lc <<< total: v.total or 0, subsidy: v.subsidy or 0
       data = JSON.parse(JSON.stringify(v.data)) or []
@@ -37,7 +36,7 @@ mod = ({root, ctx, data, parent, t}) ->
     @on \mode, (m) ~>
       lc.mode = m
       if lc.sheet => lc.sheet.render!
-      view.render \no-row, \row, \head, \sheet, \table, \viewer
+      view.render \no-row, \row, \head, \sheet, \table, \table-viewer, \sheet-viewer
     is-table-mode = ~> (@mod.info.config or {}).mode == \table
     is-readonly = ~>
       meta = @mod.info.config.meta or {}
@@ -49,6 +48,7 @@ mod = ({root, ctx, data, parent, t}) ->
       .for-each (n) -> heads.push {name: n, type: n}
     heads.map (d,i) -> d.idx = i
     @mod.child.sheet-update = ->
+      if !lc.sheet => return
       d = lc.sheet.data!
       d.splice 0, 1
       d = [heads.map(->t it.name)] ++ d
@@ -110,6 +110,7 @@ mod = ({root, ctx, data, parent, t}) ->
     @mod.child.view = view = new ldview do
       root: root
       init: sheet: ({node, ctx}) ~>
+        if is-table-mode! => return
         size = heads.map ->
           ret = it.width or ''
           if it.type == \name and !ret => ret = \250px
@@ -143,14 +144,15 @@ mod = ({root, ctx, data, parent, t}) ->
       handler:
         sheet: ({node}) ~> node.classList.toggle \d-none, (@mode! == \view or is-table-mode!)
         table: ({node}) ~> node.classList.toggle \d-none, (@mode! == \view or !is-table-mode!)
-        viewer: ({node}) ~> node.classList.toggle \d-none, @mode! != \view
+        "table-viewer": ({node}) ~> node.classList.toggle \d-none, (@mode! != \view or !is-table-mode!)
+        "sheet-viewer": ({node}) ~> node.classList.toggle \d-none, (@mode! != \view or is-table-mode!)
         total: ({node}) ~> node.classList.toggle \text-danger, (@status! == 2)
         "head":
           list: -> heads
           key: -> it.idx
           view: handler: "@": ({node, ctx}) ->
             node.innerText = t(ctx.name)
-            node.style.width = ctx.width or ''
+            node.style.width = ctx.width or (if ctx.type == \name => \250px else '')
         "no-row": ({node}) ->
           row-count = (lc._data or [])
             .filter(-> it and it.filter and it.filter(->it?).length)
@@ -158,8 +160,15 @@ mod = ({root, ctx, data, parent, t}) ->
           node.classList.toggle \d-none, !row-count
         row:
           list: ->
+            itm = is-table-mode!
             ret = (lc._data or []).map (d,i) -> {data: d, idx: i}
-            ret.filter(-> it and it.data.filter and it.data.filter(->it?).length).slice 1
+            ret = ret.filter(->
+              it and it.data.filter and
+              # in table mode, empty row has to be shown so user can input data (`itm`)
+              # yet in sheet mode, this is only for viewing. no need to show empty row (`or it != ''`)
+              it.data.filter(->it? and (itm or it != '')).length
+            ).slice 1
+            ret
           key: -> it.idx
           view:
             action: click: delete: ({ctx, views}) ~>
@@ -167,11 +176,13 @@ mod = ({root, ctx, data, parent, t}) ->
               ret = update-data lc._data, view
             handler:
               col:
-                list: -> heads
+                list: ->
+                  console.log heads
+                  heads
                 key: -> it.idx
                 view:
                   handler: "@": ({node, ctx, ctxs, views}) ->
-                    node.style.width = ctx.width or ''
+                    node.style.width = ctx.width or (if ctx.type == \name => \250px else '')
                     v = ctxs.0.data[ctx.idx] or ''
                     node.value = v
                     node.innerText = v

@@ -1,5 +1,17 @@
 # Change Log
 
+## v0.0.19
+
+ - use `sheet-viewer` / `table-viewer` for viewer of corresponding edit mode
+ - use table for sheet-viewer for better layout and alignment
+ - tweak sheet cell max height
+ - check empty line against `undefined` and also `''` (only for sheet-viewer)
+ - skip sheet update if not in sheet mode to prevent data corruption
+ - move `lc` into `init` function to prevent unexpected wrong scope
+ - force cell size for name fields also in viewer mode
+ - ensure minimal cell width 5.5em for viewer mode
+
+
 ## v0.0.18
 
  - remove unnecessary log

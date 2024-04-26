@@ -1,7 +1,10 @@
 .sheet .disabled { background: #eee; color: #777 }
 .sheet .hl {border-bottom: 2px solid #000 }
-.sheet .name-field { white-space: normal; word-break: break-all }
-.sheet .cell, .sheet .edit textarea { max-height: 300px }
+/* we set white-space to `normal` earlier.
+   not sure whether pre-wrap or normal is better.
+   but pre-wrap helps in preserving line breaks */
+.sheet .name-field { white-space: pre-wrap; word-break: break-all }
+.sheet .cell, .sheet .edit textarea { max-height: 200px }
 [ld=total].text-danger:after
   font-family: ldi
   display: inline
@@ -17,7 +20,8 @@
   display: flex
   position: relative
   .form-control
-    width: 0
+    // preserve a minimal width
+    width: 5.5em
     box-shadow: none!important
     resize: none
   i.i-close
@@ -53,3 +57,11 @@
   .form-control
     border-top-left-radius: 0
     border-top-right-radius: 0
+td
+  padding: .25em
+table, th, td
+  border: 1px solid #ddd
+  border-collapse: collapse
+tr.row-head
+  background: #eee
+  color: #777

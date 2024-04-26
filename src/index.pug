@@ -10,6 +10,12 @@ div
       .m-edit: .mf-note.text-sm(ld="limitation")
     .text-sm.text-muted(ld="display", data-display="block"): div(ld="desc", style="margin:-.6em 0 .7em")
     .rounded.shadow-sm.border.mb-2.aspect-ratio.ratio-3by2.w-100(ld="sheet")
+    .mb-2(ld="sheet-viewer")
+      table.w-100.rounded.shadow-sm
+        tr.row-head
+          td(ld-each="head")
+        tr(ld="no-row"): td.text-muted(t="無資料")
+        tr(ld-each="row"): td(ld-each="col")
     .mb-2(ld="table")
       .mb-2
         .lc-sheet-row: .row-head.form-control(ld-each="head")
@@ -17,7 +23,7 @@ div
         .lc-sheet-row(ld-each="row")
           i.i-close(ld="delete")
           textarea.form-control(ld-each="col")
-    .mb-2(ld="viewer")
+    .mb-2(ld="table-viewer")
       .mb-2.lc-sheet-viewer
         .lc-sheet-row
           .row-head.form-control(ld-each="head")
