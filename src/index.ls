@@ -176,9 +176,7 @@ mod = ({root, ctx, data, parent, t}) ->
               ret = update-data lc._data, view
             handler:
               col:
-                list: ->
-                  console.log heads
-                  heads
+                list: -> heads
                 key: -> it.idx
                 view:
                   handler: "@": ({node, ctx, ctxs, views}) ->

@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.20
+
+ - remove unused log
+
+
 ## v0.0.19
 
  - use `sheet-viewer` / `table-viewer` for viewer of corresponding edit mode
