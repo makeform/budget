@@ -32,6 +32,7 @@ mod = ({root, ctx, data, parent, t}) ->
       ret = get-sum lc._data
       lc <<< ret{total, subsidy}
       if lc.sheet => lc.sheet.data ret.data
+      update-data lc._data
       view.render \total, \no-row, \row, \head
     @on \mode, (m) ~>
       lc.mode = m
@@ -53,6 +54,7 @@ mod = ({root, ctx, data, parent, t}) ->
       d.splice 0, 1
       d = [heads.map(->t it.name)] ++ d
       ret = get-sum d
+      lc <<< ret{total, subsidy}
       lc.sheet.data ret.data
     types = heads.map(-> it.type)
     typeidx = {}
@@ -61,11 +63,15 @@ mod = ({root, ctx, data, parent, t}) ->
     cls = heads.map ->
       return switch it.type
       | 'total price' =>
-        if ~typeidx['unit price'] and ~typeidx['quantity'] => \disabled else ''
-      | 'subsidy' => \disabled
+        if ~typeidx['unit price'] and ~typeidx['quantity'] => 'disabled number' else 'number'
+      | 'subsidy' => 'disabled number'
+      | 'self-fund' => 'number'
+      | 'unit price' => 'number'
+      | 'quantity' => 'number'
       | 'name' => \name-field
       | otherwise => ''
 
+    pv = (v) -> ("#v".trim!replace(/,/g,''))
     get-sum = (data) ->
       sum = 0
       sum-subsidy = 0
@@ -76,21 +82,21 @@ mod = ({root, ctx, data, parent, t}) ->
       subsidy = typeidx['subsidy']
       if !(~up and ~q) =>
         for i from 1 til data.length
-          val = if data[i][tp]? and !isNaN(data[i][tp]) => +data[i][tp] else 0
+          val = if data[i][tp]? and !isNaN(pv(data[i][tp])) => +pv(data[i][tp]) else 0
           sum += (val or 0)
       else
         for i from 1 til data.length
-          [_up, _q] = [data[i][up], data[i][q]].map -> "#{if it? => it else ''}".trim!
-          val = if _up != '' and _q != '' => +_up * +_q else ''
+          [_up, _q] = [data[i][up], data[i][q]].map -> pv("#{if it? => it else ''}".trim!)
+          val = if _up != '' and _q != '' => +pv(_up) * +pv(_q) else ''
           val = if val == '' => '' else if val? and !isNaN(val) => +val else 0
           data[i][tp] = val
           sum += (val or 0)
       if (~subsidy) =>
         for i from 1 til data.length =>
           _sf = "#{if ~sf => if data[i][sf]? => data[i][sf] else ''}".trim!
-          _sf = if isNaN(+_sf) or !_sf => 0 else +_sf
+          _sf = if isNaN(+pv(_sf)) or !_sf => 0 else +pv(_sf)
           val = data[i][subsidy] = if !data[i][tp]? or data[i][tp] == '' => ''
-          else (+data[i][tp] - (_sf)) >? 0
+          else (+pv(data[i][tp]) - (_sf)) >? 0
           val = if !val => 0 else if isNaN(parseFloat(val)) => 0 else +val
           sum-subsidy += (val or 0)
       {data, total: sum, subsidy: sum-subsidy}

@@ -30,12 +30,13 @@ div
         .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
         .lc-sheet-row(ld-each="row"): .form-control(ld-each="col")
 
-    .d-flex.justify-content-between
-      .d-flex.g-2.align-items-end
-        div #[span(t) 總金額]:
-        .d-flex.align-items-center(ld="total")
-        .text-sm.text-muted(ld="unit")
+    .d-flex.justify-content-between.align-items-start
+      .d-flex.g-4.align-items-start
+        .d-flex.g-2.align-items-end
+          div #[span(t) 總金額]:
+          .d-flex.align-items-center(ld="total")
+          .text-sm.text-muted(ld="unit")
+        .m-edit.d-flex.g-1.flex-wrap: .text-danger(ld-each="error")
       div(ld="table"): .btn.btn-sm.btn-outline-secondary(t="追加",ld="add")
 
-    .m-edit: .hover-tip.tip-sm: div(ld-each="error")
     .m-edit(ld="display",data-display="block"): .mf-note.text-sm.mt-2.note(ld-each="note")

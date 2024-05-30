@@ -1,5 +1,13 @@
 # Change Log
 
+## v0.0.21
+
+ - align number to the right
+ - proper handle number with comma
+ - update data and set lc field when needed
+ - show error as text instead of tip
+
+
 ## v0.0.20
 
  - remove unused log
