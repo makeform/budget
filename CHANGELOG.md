@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.22
+
+ - tweak name field size
+
+
 ## v0.0.21
 
  - align number to the right

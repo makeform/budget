@@ -119,7 +119,7 @@ mod = ({root, ctx, data, parent, t}) ->
         if is-table-mode! => return
         size = heads.map ->
           ret = it.width or ''
-          if it.type == \name and !ret => ret = \250px
+          if it.type == \name and !ret => ret = \190px
           return ret
         lc.sheet = sh = new sheet do
           root: node
@@ -158,7 +158,7 @@ mod = ({root, ctx, data, parent, t}) ->
           key: -> it.idx
           view: handler: "@": ({node, ctx}) ->
             node.innerText = t(ctx.name)
-            node.style.width = ctx.width or (if ctx.type == \name => \250px else '')
+            node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
         "no-row": ({node}) ->
           row-count = (lc._data or [])
             .filter(-> it and it.filter and it.filter(->it?).length)
@@ -186,7 +186,7 @@ mod = ({root, ctx, data, parent, t}) ->
                 key: -> it.idx
                 view:
                   handler: "@": ({node, ctx, ctxs, views}) ->
-                    node.style.width = ctx.width or (if ctx.type == \name => \250px else '')
+                    node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
                     v = ctxs.0.data[ctx.idx] or ''
                     node.value = v
                     node.innerText = v
