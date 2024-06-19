@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.0.23
+
+ - fix bug: 0 is not shown in sheet view mode
+ - fix bug: the first row is not shown in sheet view mode
+
+
 ## v0.0.22
 
  - tweak name field size

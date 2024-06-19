@@ -31,7 +31,7 @@ mod = ({root, ctx, data, parent, t}) ->
       lc._data = JSON.parse(JSON.stringify(data)) or []
       ret = get-sum lc._data
       lc <<< ret{total, subsidy}
-      if lc.sheet => lc.sheet.data ret.data
+      if lc.sheet => lc.sheet.data JSON.parse(JSON.stringify(ret.data))
       update-data lc._data
       view.render \total, \no-row, \row, \head
     @on \mode, (m) ~>
@@ -187,7 +187,7 @@ mod = ({root, ctx, data, parent, t}) ->
                 view:
                   handler: "@": ({node, ctx, ctxs, views}) ->
                     node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
-                    v = ctxs.0.data[ctx.idx] or ''
+                    v = if ctxs.0.data[ctx.idx]? => ctxs.0.data[ctx.idx] else ''
                     node.value = v
                     node.innerText = v
                     _update!
