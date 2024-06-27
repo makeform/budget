@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.0.24
+
+ - fix bug: readonly flag read from incorrect field.
+ - add `readonly` css class for indicating readonly status
+
+
 ## v0.0.23
 
  - fix bug: 0 is not shown in sheet view mode

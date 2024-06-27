@@ -40,7 +40,7 @@ mod = ({root, ctx, data, parent, t}) ->
       view.render \no-row, \row, \head, \sheet, \table, \table-viewer, \sheet-viewer
     is-table-mode = ~> (@mod.info.config or {}).mode == \table
     is-readonly = ~>
-      meta = @mod.info.config.meta or {}
+      meta = @mod.info.meta or {}
       return (lc.mode == \view) or meta.disabled or meta.readonly
     heads = ((@mod.info.config or {}).fields or [])
     lc._data = [heads.map -> it]
@@ -138,7 +138,10 @@ mod = ({root, ctx, data, parent, t}) ->
               return false
             if type == \class =>
               if row == 0 => return \disabled
-              return cls[col] or ''
+              ret = []
+              if is-readonly! => ret.push \readonly
+              if cls[col] => ret.push cls[col]
+              return ret.join(' ')
         sh.on \change, ~>
           if is-readonly! => return sh.data JSON.parse(JSON.stringify(lc._data))
           data = sh.data!
