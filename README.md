@@ -12,7 +12,7 @@
    - `width`: optional. used for explicitly set cell width (with unit).
  - `mode`: either `sheet` or `table`. default `sheet` if omitted.
    - when setting to `table`, table style edit interface is used. otherwise `@plotdb/sheet` is used.
-
+ - `unit`: unit of the amount (displayed next to total amount field)
 
 ## License
 
