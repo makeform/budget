@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.1.0 (upcoming)
+
+ - tweak DOM based on updated `@makeform/common` DOM structure.
+
+
 ## v0.0.24
 
  - fix bug: readonly flag read from incorrect field.

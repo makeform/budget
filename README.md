@@ -14,6 +14,7 @@
    - when setting to `table`, table style edit interface is used. otherwise `@plotdb/sheet` is used.
  - `unit`: unit of the amount (displayed next to total amount field)
 
+
 ## License
 
 MIT

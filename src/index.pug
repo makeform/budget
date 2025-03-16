@@ -1,14 +1,7 @@
 div
   style(type="text/css"): include:stylus index.styl
   script(type="@plotdb/block"): include:lsc index.ls
-  .form-group.has-tips.manual(ld="base error-root",plug="widget",style="cursor:default")
-    div(ld="display", data-display="block"): label.d-flex.align-items-end.flex-wrap
-      div
-        span(ld="label")
-        span.text-danger.ml-2(ld="is-required") *
-      .flex-grow-1
-      .m-edit: .mf-note.text-sm(ld="limitation")
-    .text-sm.text-muted(ld="display", data-display="block"): div(ld="desc", style="margin:-.6em 0 .7em")
+  div(plug="body")
     .rounded.shadow-sm.border.mb-2.aspect-ratio.ratio-3by2.w-100(ld="sheet")
     .mb-2(ld="sheet-viewer")
       table.w-100.rounded.shadow-sm
@@ -29,7 +22,6 @@ div
           .row-head.form-control(ld-each="head")
         .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
         .lc-sheet-row(ld-each="row"): .form-control(ld-each="col")
-
     .d-flex.justify-content-between.align-items-start
       .d-flex.g-4.align-items-start
         .d-flex.g-2.align-items-end
@@ -38,5 +30,3 @@ div
           .text-sm.text-muted(ld="unit")
         .m-edit.d-flex.g-1.flex-wrap: .text-danger(ld-each="error")
       div(ld="table"): .btn.btn-sm.btn-outline-secondary(t="追加",ld="add")
-
-    .m-edit(ld="display",data-display="block"): .mf-note.text-sm.mt-2.note(ld-each="note")
