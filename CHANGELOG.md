@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.1.0 (upcoming)
+## v0.1.0
 
  - tweak DOM based on updated `@makeform/common` DOM structure.
 
