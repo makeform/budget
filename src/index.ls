@@ -19,6 +19,23 @@ module.exports =
         config:
           mode: name: 'Mode', desc: 'Use either sheet or table for budget editing'
           unit: name: 'Unit', desc: "Display an additional unit label or suffix."
+        head:
+          "add-option": "Add Option"
+          edit: title: 'Edit Fields'
+          name: title: 'Field Name'
+          type: title: 'Field Purpose'
+          mode: title: 'Field Mode'
+        type:
+          'name': 'Name'
+          'unit price': 'Unit Price'
+          'quantity': 'Quantity'
+          'total price': 'Total Price'
+          'self-fund': 'self-fund'
+          'subsidy': 'Subsidy'
+          'other': 'Other'
+        mode:
+          'select': 'Select Box (Table Only)'
+          'input': 'Input Box'
       "zh-TW":
         "單位": "單位"
         "總金額": "總金額"
@@ -29,12 +46,29 @@ module.exports =
         config:
           mode: name: '模式', desc: '使用試算表或一般表格來填寫金額'
           unit: name: '單位', desc: "顯示額外的單位提示"
+        head:
+          "add-option": "增加選項"
+          edit: title: '編輯欄位'
+          name: title: '欄位名稱'
+          type: title: '欄位用途'
+          mode: title: '欄位模式'
+        type:
+          'name': '名稱'
+          'unit price': '單價'
+          'quantity': '數量'
+          'total price': '總價'
+          'self-fund': '自籌款'
+          'subsidy': '補助款'
+          'other': '其它'
+        mode:
+          'select': '選擇框 (表格專用)'
+          'input': '輸入框'
 
   init: (opt) ->
     opt.pubsub.on \inited, (o = {}) ~> @ <<< o
     opt.pubsub.fire \subinit, mod: mod.call @, opt
 
-mod = ({root, ctx, data, parent, t}) -> 
+mod = ({root, ctx, data, parent, i18n, t}) ->
   {sheet} = ctx
   hitf = ~> @hitf
 
@@ -46,21 +80,16 @@ mod = ({root, ctx, data, parent, t}) ->
         values: [{name: \試算表, value: \sheet}, {name: \一般表格, value: \table}]
       unit: type: \text, name: \config.unit.name, desc: \config.unit.desc
     sample: ~> config: fields: [
-      * name: \預算分類, mode: 'select'
-        values: <[人事費 事務費 業務費 維護費 旅運費 材料費 其他費]>
-        default: \人事費
-        width: \300px
       * name: "預算細目", type: 'name'
-        width: \300px
       * name: "金額", type: 'total price'
-      * name: "說明", width: '280px'
+      * name: "說明"
       ]
   init: ->
     lc = total: 0, mode: \edit
     @on \change, (v = {}) ~>
       lc <<< total: v.total or 0, subsidy: v.subsidy or 0
       data = JSON.parse(JSON.stringify(v.data)) or []
-      data = [heads.map(->t it.name)] ++ data
+      data = [heads.map(->hitf!totext it.name)] ++ data
       lc._data = JSON.parse(JSON.stringify(data)) or []
       ret = get-sum lc._data
       lc <<< ret{total, subsidy}
@@ -72,6 +101,8 @@ mod = ({root, ctx, data, parent, t}) ->
       lc.mode = m
       if lc.sheet => lc.sheet.render!
       view.render \no-row, \row, \head, \sheet, \table, \table-viewer, \sheet-viewer
+    keygen = -> "#{Date.now!}-#{Math.random!toString(36)substring(2)}"
+    getkey = -> it.key or it
     is-table-mode = ~> (@mod.info.config or {}).mode == \table
     is-readonly = ~>
       meta = @mod.info.meta or {}
@@ -113,7 +144,7 @@ mod = ({root, ctx, data, parent, t}) ->
       if !lc.sheet => return
       d = lc.sheet.data!
       d.splice 0, 1
-      d = [heads.map(->t it.name)] ++ d
+      d = [heads.map(->hitf!totext it.name)] ++ d
       ret = get-sum d
       lc <<< ret{total, subsidy}
       lc.sheet.data ret.data
@@ -167,7 +198,7 @@ mod = ({root, ctx, data, parent, t}) ->
         lc.sheet = sh = new sheet do
           root: node
           slider: true
-          data: [heads.map(->t it.name)]
+          data: [heads.map(-> hitf!totext it.name)]
           frozen: row: 1
           class: row: <[hl]>
           scroll-lock: true
@@ -193,6 +224,76 @@ mod = ({root, ctx, data, parent, t}) ->
         lc._data.push heads.map(->'')
         update-data lc._data, view
       handler:
+        "head-edit":
+          action: click: add: ->
+            hitf!get!{}config[]fields.push do
+              name: \untitled, type: '', mode: \input
+            hitf!set!
+            view.render!
+          handler:
+            head:
+              list: -> heads.map (obj, idx) -> {obj, idx}
+              key: -> it.idx
+              view:
+                handler:
+                  "if-select": ({node, ctx}) -> node.classList.toggle \d-none, (ctx.obj.mode != \select)
+                  option:
+                    list: ({ctx}) -> ctx.obj.values or []
+                    key: -> getkey(it)
+                    view:
+                      handler: text: hitf!render obj: ({ctx}) -> ctx.label or ctx or {}
+                      action: click:
+                        text: hitf!edit obj: ({ctx}) -> ctx{}label
+                        remove: ({node, ctx, ctxs}) ->
+                          ctxs.0.obj.values = ctxs.0.obj.values.filter(-> it != ctx)
+                          hitf!set!
+                          view.render!
+                  name: hitf!render obj: ({ctx}) -> ctx.obj.name
+                  type: ({node, ctx}) -> node.value = ctx?obj.type or \other
+                  mode: ({node, ctx}) -> node.value = ctx?obj.mode or \input
+                action:
+                  change:
+                    type: ({node, ctx}) ->
+                      hitf!get!?config?fields[ctx.idx].type = node.value;hitf!set!;build-heads!;view.render!
+                    mode: ({node, ctx}) ->
+                      hitf!get!?config?fields[ctx.idx].mode = node.value;hitf!set!;build-heads!;view.render!
+                  input:
+                    type: ({node, ctx}) ->
+                      hitf!get!?config?fields[ctx.idx].type = node.value;hitf!set!;build-heads!;view.render!
+                    mode: ({node, ctx}) ->
+                      hitf!get!?config?fields[ctx.idx].mode = node.value;hitf!set!;build-heads!;view.render!
+                  click:
+                    name: hitf!edit obj: ({ctx}) ->
+                      ctx.obj.name = if typeof(ctx.obj.name) == \string => {} else ctx.obj.name
+                    "add-option": ({node, ctx}) ->
+                      if ctx.obj.mode != \select => return
+                      ctx.obj[]values.push key: keygen!, label: hitf!wrap "#{i18n.language}": "untitled"
+                      hitf!set!
+                      view.render!
+                    up: ({node, ctx, ctxs}) ->
+                      fields = hitf!get!config?fields or []
+                      if (idx = fields.indexOf ctx.obj) <= 0 => return
+                      fields.splice idx, 1
+                      fields.splice (idx - 1), 0, ctx.obj
+                      build-heads!
+                      hitf!set!
+                      view.render!
+                    down: ({node, ctx, ctxs}) ->
+                      fields = hitf!get!config?fields or []
+                      len = fields.length
+                      if (idx = (fields.indexOf ctx.obj)) >= len - 1 => return
+                      fields.splice idx, 1
+                      fields.splice (idx + 1), 0, ctx.obj
+                      build-heads!
+                      hitf!set!
+                      view.render!
+                    remove: ({node, ctx}) ->
+                      hs = hitf!get!?config?fields or []
+                      hitf!get!?config?fields = hs.filter((d,i) -> i != ctx.idx)
+                      hitf!set!
+                      build-heads!
+                      view.render!
+
         sheet: ({node}) ~>
           node.classList.toggle \d-none, (@mode! == \view or is-table-mode!)
           if (is-table-mode! and hitf!readonly!) or !lc._heads-dirty => return
@@ -203,7 +304,7 @@ mod = ({root, ctx, data, parent, t}) ->
             return ret
           lc.sheet.size col: size
           d = lc.sheet.data!
-          d.0 = heads.map(->t it.name)
+          d.0 = heads.map(->hitf!totext it.name)
           lc.sheet.data d
         table: ({node}) ~> node.classList.toggle \d-none, (@mode! == \view or !is-table-mode!)
         "table-viewer": ({node}) ~> node.classList.toggle \d-none, (@mode! != \view or !is-table-mode!)
@@ -213,8 +314,10 @@ mod = ({root, ctx, data, parent, t}) ->
           list: -> heads
           key: -> it.idx
           view: handler: "@": ({node, ctx}) ->
-            node.innerText = t(ctx.name)
-            node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
+            node.innerText = hitf!totext(ctx.name)
+            w = ctx.width or (if ctx.type == \name => \200px else '')
+            node.style.width = w
+            node.style.flexBasis = if ctx.width => ctx.width else \1px
         "no-row": ({node}) ->
           row-count = (lc._data or [])
             .filter(-> it and it.filter and it.filter(->it?).length)
@@ -261,7 +364,7 @@ mod = ({root, ctx, data, parent, t}) ->
                           key: -> it
                           view: handler: "@": ({node, ctx}) ->
                             node.setAttribute \value, ctx
-                            node.textContent = ctx
+                            node.textContent = hitf!totext(ctx.label or ctx)
                     "textarea": ({node, ctx, ctxs, views}) ->
                       node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
                       v = if ctxs.0.data[ctx.idx]? => ctxs.0.data[ctx.idx] else ''
@@ -269,7 +372,9 @@ mod = ({root, ctx, data, parent, t}) ->
                       node.innerText = v
                       _update!
                     "@": ({node, ctx, ctxs, views}) ->
-                      node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
+                      w = ctx.width or (if ctx.type == \name => \200px else '')
+                      node.style.width = w
+                      node.style.flexBasis = if ctx.width => ctx.width else \1px
                     content: ({node, ctx, ctxs, views}) ->
                       node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
                       v = if ctxs.0.data[ctx.idx]? => ctxs.0.data[ctx.idx] else ''

@@ -2,6 +2,36 @@ div
   style(type="text/css"): include:stylus index.styl
   script(type="@plotdb/block"): include:lsc index.ls
   div(plug="body")
+    .cps-ctrl.my-3
+      .text-sm(t="head.edit.title")
+      .border.rounded.p-2(ld="head-edit",ld-scope)
+        .d-flex.g-2
+          .text-sm(t="head.name.title",style="flex:1 0 1px")
+          .text-sm(t="head.type.title",style="flex:1 0 1px")
+          .text-sm(t="head.mode.title",style="flex:1 0 1px")
+          .text-sm(style="width:2em;flex:0 0 auto")
+        .mb-2(ld-each="head")
+          .d-flex.g-2.align-items-center
+            .form-control.form-control-sm(style="flex:1 0 1px"): div(ld="name")
+            select.form-control.form-control-sm(ld="type",style="flex:1 0 1px")
+              for type in ['name', 'unit price', 'quantity', 'total price', 'self-fund', 'subsidy', 'other']
+                option(value=type,t=`type.${type}`)
+            select.form-control.form-control-sm(ld="mode",style="flex:1 0 1px")
+              option(value="select",t="mode.select")
+              option(value="input",t="mode.input")
+            i.i-close.text-sm.ml-1.cps-remove(ld="remove",style="width:2em;flex:0 0 auto")
+            i.i-chevron-up.text-sm.ml-1.cps-ctrl.clickable(ld="up",style="width:2em;flex:0 0 auto")
+            i.i-chevron-down.text-sm.ml-1.cps-ctrl.clickable(ld="down",style="width:2em;flex:0 0 auto")
+          .d-none(ld="if-select"): .d-flex.align-items-center.bg-light.mt-1.rounded.p-2.g-2
+            .clickable.cps-ctrl.btn.btn-sm.btn-outline-secondary(
+            ld="add-option",style="flex:0 0 auto") #[span(t="head.add-option")]
+            .flex-grow-1.d-flex.g-2.align-items-center
+              div(ld-each="option"): .d-flex.g-1
+                .text-sm(ld="text")
+                i.i-close.text-sm.ml-1.cps-hover.cps-remove(ld="remove",style="width:2em;flex:0 0 auto")
+        .clickable.rounded-sm.bg-dark.cps-add(ld="add") ＋
+
+
     .rounded.shadow-sm.border.mb-2.aspect-ratio.ratio-3by2.w-100(ld="sheet")
     .mb-2(ld="sheet-viewer")
       table.w-100.rounded.shadow-sm
