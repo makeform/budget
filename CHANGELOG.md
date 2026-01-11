@@ -1,5 +1,11 @@
 # Change Log
 
+## v1.0.0 (upcoming)
+
+ - support `@grantdash/composer` host
+ - support selectable field in table mode
+
+
 ## v0.1.0
 
  - tweak DOM based on updated `@makeform/common` DOM structure.
