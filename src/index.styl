@@ -41,13 +41,15 @@
     color: var(--danger)
     left: -.75em
     cursor: pointer
-  .form-control, .row-head
+  .form-wrapper, .form-control, .row-head
     flex: 1 1 auto
-  .form-control:not(:last-child)
+  .form-wrapper
+    display: flex
+  .row-head:not(:last-child), .form-wrapper:not(:last-child) .form-control
     border-right: 0
     border-top-right-radius: 0
     border-bottom-right-radius: 0
-  .form-control:not(:nth-child(-n + 2)), .row-head:not(:nth-child(-n + 1))
+  .row-head:not(:nth-child(-n + 1)), .form-wrapper:not(:nth-child(-n + 2)) .form-control
     border-top-left-radius: 0
     border-bottom-left-radius: 0
 .lc-sheet-row:not(:last-child)

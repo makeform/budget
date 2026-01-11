@@ -1,10 +1,12 @@
 module.exports =
   pkg:
-    name: "@makeform/budget", extend: {name: "@makeform/common"}
+    name: \@makeform/budget
+    extend: name: \@makeform/common
+    host: name: \@grantdash/composer
     dependencies: [
-      {name: "papaparse", path: "papaparse.min.js"}
-      {name: "@plotdb/sheet"}
-      {name: "@plotdb/sheet", type: \css}
+    * name: "papaparse", path: "papaparse.min.js"
+    * name: "@plotdb/sheet"
+    * name: "@plotdb/sheet", type: \css
     ]
     i18n:
       "en":
@@ -12,16 +14,47 @@ module.exports =
         "總金額": "Subtotal"
         "追加": "Add"
         "無資料": "No Data"
+        sheet: "Sheet"
+        table: "Table"
+        config:
+          mode: name: 'Mode', desc: 'Use either sheet or table for budget editing'
+          unit: name: 'Unit', desc: "Display an additional unit label or suffix."
       "zh-TW":
         "單位": "單位"
         "總金額": "總金額"
         "追加": "追加"
         "無資料": "無資料"
+        sheet: "試算表"
+        table: "一般表格"
+        config:
+          mode: name: '模式', desc: '使用試算表或一般表格來填寫金額'
+          unit: name: '單位', desc: "顯示額外的單位提示"
 
-  init: (opt) -> opt.pubsub.fire \subinit, mod: mod(opt)
+  init: (opt) ->
+    opt.pubsub.on \inited, (o = {}) ~> @ <<< o
+    opt.pubsub.fire \subinit, mod: mod.call @, opt
 
 mod = ({root, ctx, data, parent, t}) -> 
   {sheet} = ctx
+  hitf = ~> @hitf
+
+  @client = (bid) ~>
+    minibar: []
+    meta: config:
+      mode:
+        type: \choice, name: \config.mode.name, desc: \config.mode.desc
+        values: [{name: \試算表, value: \sheet}, {name: \一般表格, value: \table}]
+      unit: type: \text, name: \config.unit.name, desc: \config.unit.desc
+    sample: ~> config: fields: [
+      * name: \預算分類, mode: 'select'
+        values: <[人事費 事務費 業務費 維護費 旅運費 材料費 其他費]>
+        default: \人事費
+        width: \300px
+      * name: "預算細目", type: 'name'
+        width: \300px
+      * name: "金額", type: 'total price'
+      * name: "說明", width: '280px'
+      ]
   init: ->
     lc = total: 0, mode: \edit
     @on \change, (v = {}) ~>
@@ -34,6 +67,7 @@ mod = ({root, ctx, data, parent, t}) ->
       if lc.sheet => lc.sheet.data JSON.parse(JSON.stringify(ret.data))
       update-data lc._data
       view.render \total, \no-row, \row, \head
+    @on \meta, -> build-heads!; if view => view.render!
     @on \mode, (m) ~>
       lc.mode = m
       if lc.sheet => lc.sheet.render!
@@ -42,12 +76,39 @@ mod = ({root, ctx, data, parent, t}) ->
     is-readonly = ~>
       meta = @mod.info.meta or {}
       return (lc.mode == \view) or meta.disabled or meta.readonly
-    heads = ((@mod.info.config or {}).fields or [])
-    lc._data = [heads.map -> it]
-    ['total price']
-      .filter (n) -> !heads.filter((h)-> h.type == n).length
-      .for-each (n) -> heads.push {name: n, type: n}
-    heads.map (d,i) -> d.idx = i
+    old-heads = []
+    heads = []
+    types = []
+    typeidx = {}
+    cls = []
+    build-heads = ~>
+      heads := hitf!get!?config?fields or []
+      # heads-dirty will be reset after sheet is redrawn.
+      # this can help reducing rendering of sheet
+      lc._heads-dirty = (old-heads != JSON.stringify(heads))
+      old-heads := JSON.stringify(heads)
+      lc._data = [heads.map -> it]
+      ['total price']
+        .filter (n) -> !heads.filter((h)-> h.type == n).length
+        .for-each (n) -> heads.push {name: n, type: n}
+      heads.map (d,i) -> d.idx = i
+      types := heads.map(-> it.type)
+      typeidx := {}
+      ['name', 'unit price', 'quantity', 'total price', 'self-fund', 'subsidy'].map (n) ->
+        typeidx[n] = types.indexOf(n)
+      cls := heads.map ->
+        return switch it.type
+        | 'total price' =>
+          if ~typeidx['unit price'] and ~typeidx['quantity'] => 'disabled number' else 'number'
+        | 'subsidy' => 'disabled number'
+        | 'self-fund' => 'number'
+        | 'unit price' => 'number'
+        | 'quantity' => 'number'
+        | 'name' => \name-field
+        | otherwise => ''
+
+    build-heads!
+
     @mod.child.sheet-update = ->
       if !lc.sheet => return
       d = lc.sheet.data!
@@ -56,20 +117,6 @@ mod = ({root, ctx, data, parent, t}) ->
       ret = get-sum d
       lc <<< ret{total, subsidy}
       lc.sheet.data ret.data
-    types = heads.map(-> it.type)
-    typeidx = {}
-    ['name', 'unit price', 'quantity', 'total price', 'self-fund', 'subsidy'].map (n) ->
-      typeidx[n] = types.indexOf(n)
-    cls = heads.map ->
-      return switch it.type
-      | 'total price' =>
-        if ~typeidx['unit price'] and ~typeidx['quantity'] => 'disabled number' else 'number'
-      | 'subsidy' => 'disabled number'
-      | 'self-fund' => 'number'
-      | 'unit price' => 'number'
-      | 'quantity' => 'number'
-      | 'name' => \name-field
-      | otherwise => ''
 
     pv = (v) -> ("#v".trim!replace(/,/g,''))
     get-sum = (data) ->
@@ -116,17 +163,12 @@ mod = ({root, ctx, data, parent, t}) ->
     @mod.child.view = view = new ldview do
       root: root
       init: sheet: ({node, ctx}) ~>
-        if is-table-mode! => return
-        size = heads.map ->
-          ret = it.width or ''
-          if it.type == \name and !ret => ret = \190px
-          return ret
+        if is-table-mode! and hitf!readonly! => return
         lc.sheet = sh = new sheet do
           root: node
           slider: true
           data: [heads.map(->t it.name)]
           frozen: row: 1
-          size: col: size
           class: row: <[hl]>
           scroll-lock: true
           enable-scrolling: false
@@ -151,7 +193,18 @@ mod = ({root, ctx, data, parent, t}) ->
         lc._data.push heads.map(->'')
         update-data lc._data, view
       handler:
-        sheet: ({node}) ~> node.classList.toggle \d-none, (@mode! == \view or is-table-mode!)
+        sheet: ({node}) ~>
+          node.classList.toggle \d-none, (@mode! == \view or is-table-mode!)
+          if (is-table-mode! and hitf!readonly!) or !lc._heads-dirty => return
+          lc._heads-dirty = false
+          size = heads.map ->
+            ret = it.width or ''
+            if it.type == \name and !ret => ret = \190px
+            return ret
+          lc.sheet.size col: size
+          d = lc.sheet.data!
+          d.0 = heads.map(->t it.name)
+          lc.sheet.data d
         table: ({node}) ~> node.classList.toggle \d-none, (@mode! == \view or !is-table-mode!)
         "table-viewer": ({node}) ~> node.classList.toggle \d-none, (@mode! != \view or !is-table-mode!)
         "sheet-viewer": ({node}) ~> node.classList.toggle \d-none, (@mode! != \view or is-table-mode!)
@@ -188,17 +241,46 @@ mod = ({root, ctx, data, parent, t}) ->
                 list: -> heads
                 key: -> it.idx
                 view:
-                  handler: "@": ({node, ctx, ctxs, views}) ->
-                    node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
-                    v = if ctxs.0.data[ctx.idx]? => ctxs.0.data[ctx.idx] else ''
-                    node.value = v
-                    node.innerText = v
-                    _update!
+                  init:
+                    "textarea": ({node, ctx}) ->
+                      node.classList.toggle \d-none, (ctx.mode? and ctx.mode == \select)
+                  handler:
+                    "select":
+                      init: "@": ({node, ctxs}) ->
+                        node.classList.toggle \d-none, (ctxs.0.mode != \select)
+                      action: change: "@": ({node, ctxs, views}) ->
+                        lc._data[ctxs.1.idx][ctxs.0.idx] = node.value or ''
+                        update-data lc._data, views.2
+                      handler:
+                        "@": ({node, ctx, ctxs}) ->
+                          node.style.width = ctxs.0.width or (if ctxs.0.type == \name => \200px else '')
+                          v = if ctxs.1.data[ctxs.0.idx] => ctxs.1.data[ctxs.0.idx] else ctxs.0.default
+                          node.value = v
+                        option:
+                          list: ({ctxs}) -> ctxs.0.values or []
+                          key: -> it
+                          view: handler: "@": ({node, ctx}) ->
+                            node.setAttribute \value, ctx
+                            node.textContent = ctx
+                    "textarea": ({node, ctx, ctxs, views}) ->
+                      node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
+                      v = if ctxs.0.data[ctx.idx]? => ctxs.0.data[ctx.idx] else ''
+                      node.value = v
+                      node.innerText = v
+                      _update!
+                    "@": ({node, ctx, ctxs, views}) ->
+                      node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
+                    content: ({node, ctx, ctxs, views}) ->
+                      node.style.width = ctx.width or (if ctx.type == \name => \200px else '')
+                      v = if ctxs.0.data[ctx.idx]? => ctxs.0.data[ctx.idx] else ''
+                      if ctx.mode == \select and !v => v = ctx.default or ''
+                      node.innerText = v
+                      _update!
                   action:
-                    input: "@": ({node, ctx, ctxs, views}) ->
+                    input: "textarea": ({node, ctx, ctxs, views}) ->
                       lc._data[ctxs.0.idx][ctx.idx] = node.value or ''
                       update-data lc._data, views.1
-                    change: "@": ({node, ctx, ctxs, views}) ->
+                    change: "textarea": ({node, ctx, ctxs, views}) ->
                       lc._data[ctxs.0.idx][ctx.idx] = node.value or ''
                       update-data lc._data, views.1
       text:
@@ -206,7 +288,7 @@ mod = ({root, ctx, data, parent, t}) ->
         unit: ({node}) ~> t(@mod.info.config.unit or '')
     _update = debounce ->
       ld$.find(root, '.lc-sheet-row').map (node) ->
-        fields = ld$.find(node, \textarea)
+        fields = ld$.find(node, 'textarea,select')
         fields.map -> it.style.height = "0px"
         sh = Math.max.apply Math, fields.map -> it.scrollHeight
         fields.map -> it.style.height = "#{sh + 2}px"

@@ -15,13 +15,16 @@ div
         .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
         .lc-sheet-row(ld-each="row")
           i.i-close(ld="delete")
-          textarea.form-control(ld-each="col")
+          .form-wrapper(ld-each="col")
+            select.form-control(ld-scope,ld="select"): option(ld-each="option")
+            textarea.form-control(ld="textarea")
     .mb-2(ld="table-viewer")
       .mb-2.lc-sheet-viewer
         .lc-sheet-row
           .row-head.form-control(ld-each="head")
         .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
-        .lc-sheet-row(ld-each="row"): .form-control(ld-each="col")
+        .lc-sheet-row(ld-each="row")
+          .form-wrapper(ld-each="col"): .form-control(ld="content")
     .d-flex.justify-content-between.align-items-start
       .d-flex.g-4.align-items-start
         .d-flex.g-2.align-items-end
