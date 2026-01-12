@@ -1,6 +1,6 @@
 # Change Log
 
-## v1.0.0 (upcoming)
+## v1.0.0
 
  - support `@grantdash/composer` host
  - support selectable field in table mode
