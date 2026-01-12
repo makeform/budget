@@ -26,9 +26,9 @@ div
             .clickable.cps-ctrl.btn.btn-sm.btn-outline-secondary(
             ld="add-option",style="flex:0 0 auto") #[span(t="head.add-option")]
             .flex-grow-1.d-flex.g-2.align-items-center
-              div(ld-each="option"): .d-flex.g-1
+              .cps-hover-host(ld-each="option"): .d-flex.g-1
                 .text-sm(ld="text")
-                i.i-close.text-sm.ml-1.cps-hover.cps-remove(ld="remove",style="width:2em;flex:0 0 auto")
+                i.i-close.text-sm.ml-1.cps-hover-reveal.cps-remove(ld="remove",style="width:2em;flex:0 0 auto")
         .clickable.rounded-sm.bg-dark.cps-add(ld="add") ＋
 
 
