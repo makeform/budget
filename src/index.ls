@@ -313,11 +313,13 @@ mod = ({root, ctx, data, parent, i18n, t}) ->
         "head":
           list: -> heads
           key: -> it.idx
-          view: handler: "@": ({node, ctx}) ->
-            node.innerText = hitf!totext(ctx.name)
-            w = ctx.width or (if ctx.type == \name => \200px else '')
-            node.style.width = w
-            node.style.flexBasis = if ctx.width => ctx.width else \1px
+          view: handler:
+            text: ({node, ctx}) ->
+              node.innerText = hitf!totext(ctx.name)
+            "@": ({node, ctx}) ->
+              w = ctx.width or (if ctx.type == \name => \200px else '')
+              node.style.width = w
+              node.style.flexBasis = if ctx.width => ctx.width else \1px
         "no-row": ({node}) ->
           row-count = (lc._data or [])
             .filter(-> it and it.filter and it.filter(->it?).length)

@@ -41,7 +41,9 @@ div
         tr(ld-each="row"): td(ld-each="col")
     .mb-2(ld="table")
       .mb-2
-        .lc-sheet-row: .row-head.form-control(ld-each="head")
+        .lc-sheet-row
+          .d-none //- align with edit normal rows for correct css border-radius
+          .row-head.form-wrapper(ld-each="head"): .form-control(ld="text")
         .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
         .lc-sheet-row(ld-each="row")
           i.i-close(ld="delete")
@@ -51,9 +53,11 @@ div
     .mb-2(ld="table-viewer")
       .mb-2.lc-sheet-viewer
         .lc-sheet-row
-          .row-head.form-control(ld-each="head")
+          .d-none //- align with edit normal rows for correct css border-radius
+          .row-head.form-wrapper(ld-each="head"): .form-control(ld="text")
         .lc-sheet-no-row(ld="no-row"): .form-control.text-muted(t="無資料")
         .lc-sheet-row(ld-each="row")
+          .d-none //- align with edit normal rows for correct css border-radius
           .form-wrapper(ld-each="col"): .form-control(ld="content")
     .d-flex.justify-content-between.align-items-start
       .d-flex.g-4.align-items-start
