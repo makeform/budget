@@ -243,7 +243,7 @@ mod = ({root, ctx, data, parent, i18n, t}) ->
                     view:
                       handler: text: hitf!render obj: ({ctx}) -> ctx.label or ctx or {}
                       action: click:
-                        text: hitf!edit obj: ({ctx}) -> ctx{}label
+                        text: hitf!edit path: \label, from-ctx: true
                         remove: ({node, ctx, ctxs}) ->
                           ctxs.0.obj.values = ctxs.0.obj.values.filter(-> it != ctx)
                           hitf!set!
@@ -263,8 +263,7 @@ mod = ({root, ctx, data, parent, i18n, t}) ->
                     mode: ({node, ctx}) ->
                       hitf!get!?config?fields[ctx.idx].mode = node.value;hitf!set!;build-heads!;view.render!
                   click:
-                    name: hitf!edit obj: ({ctx}) ->
-                      ctx.obj.name = if typeof(ctx.obj.name) == \string => {} else ctx.obj.name
+                    name: hitf!edit path: "obj.name", from-ctx: true
                     "add-option": ({node, ctx}) ->
                       if ctx.obj.mode != \select => return
                       ctx.obj[]values.push key: keygen!, label: hitf!wrap "#{i18n.language}": "untitled"

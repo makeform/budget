@@ -1,5 +1,11 @@
 # Change Log
 
+## v1.0.1
+
+ - fix bug: string can't be edited. use `fromCtx` to simplify this implementation
+ - upgrade dependencies
+
+
 ## v1.0.0
 
  - support `@grantdash/composer` host
