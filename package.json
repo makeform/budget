@@ -1,1 +1,1 @@
-{"name":"@makeform/budget","version":"1.0.1","description":"","scripts":{},"keywords":[],"author":"zbryikt","license":"MIT","dependencies":{"@plotdb/srcbuild":"^0.0.70"},"devDependencies":{"fedep":"^1.7.3"}}
+{"name":"@makeform/budget","version":"1.0.2","description":"","scripts":{},"keywords":[],"author":"zbryikt","license":"MIT","dependencies":{"@plotdb/srcbuild":"^0.0.71"},"devDependencies":{"fedep":"^1.7.6"}}
